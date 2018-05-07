@@ -9,7 +9,7 @@
 #define ERROR 0
 #define OVERFLOW -2
 #define Maxiter 1000000
-#define DESCOLOR 50
+#define DESCOLOR 12
 #define maxdelt 1000000
 
 using namespace std;
@@ -72,7 +72,7 @@ int main()
 
     //printf("File Directory:");
     //scanf("%s",path);
-    graphdata = fopen("K:\\Documents\\Coloring_Problem\\instances\\DSJC500.9.col", "r");
+    graphdata = fopen("K:\\Documents\\Coloring_Problem\\instances\\DSJC500.1.col", "r");
     log = fopen("log.txt", "w");
     color = DESCOLOR;
 
@@ -204,6 +204,8 @@ int main()
 
     fclose(graphdata);
     fclose(log);
+    getchar();
+    getchar();
     getchar();
     return 0;
 }

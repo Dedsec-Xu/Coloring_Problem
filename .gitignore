@@ -7,3 +7,8 @@ main.o
 *.cbp
 *.depend
 obj/
+*.depend
+*.depend
+*.layout
+*.layout
+*.depend
