@@ -1,0 +1,5 @@
+*.exe
+.vscode/settings.json
+bin/
+*.txt
+main.o

@@ -9,7 +9,7 @@
 #define ERROR 0
 #define OVERFLOW -2
 #define Maxiter 1000000
-#define DESCOLOR 28
+#define DESCOLOR 49
 #define maxdelt 10000
 
 using namespace std;
@@ -31,6 +31,8 @@ typedef struct headNode
 //EdgeNodePtr Edge;
 //}HeadNode, *HeadNodePtr;
 
+clock_t tstart, tend;
+
 void insertEdge(HeadNodePtr H, int start, int target);
 void insertEdge2(HeadNodePtr H, int start, int target);
 
@@ -40,7 +42,7 @@ void TabuSearch(
     int sol[],
     int Tabulist[][DESCOLOR],
     int Adjacent_Color_Table[][DESCOLOR],
-    int size_node, int size_edge);
+    int size_node, int size_edge, FILE *log);
 
 void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int iter, int Tabulist[][DESCOLOR], int Adjacent_Color_Table[][DESCOLOR], int sol[], int size_node);
 
@@ -69,15 +71,15 @@ int main()
 
     //printf("File Directory:");
     //scanf("%s",path);
-    graphdata = fopen("E:\\Workspace\\SMARTLAB\\COLORING\\coloring\\instances\\DSJC250.5.col", "r");
+    graphdata = fopen("K:\\Documents\\Coloring_Problem\\instances\\DSJC500.5.col", "r");
     log = fopen("log.txt", "w");
     color = DESCOLOR;
 
     fscanf(graphdata, "%d %d", &size_node, &size_edge);
 
-    fprintf(log, "opened %s :\n%d nodes and %d edges.\nRandom seed: %u\n", path, size_node, size_edge, seed);
+    fprintf(log, "opened file :\n%d nodes and %d edges.\nRandom seed: %u\n", path, size_node, size_edge, seed);
     fprintf(log, "color: %d\nMaxiter: %d\n", color, max);
-    printf("opened %s :\n%d nodes and %d edges.\nRandom seed: %u\n", path, size_node, size_edge, seed);
+    printf("opened file :\n%d nodes and %d edges.\nRandom seed: %u\n", path, size_node, size_edge, seed);
     printf("color: %d\nMaxiter: %d\n", color, max);
 
     //int sol[5] = {0, 0, 1, 2, 2};
@@ -135,7 +137,6 @@ int main()
         //printf("\n%d",size_node);
         if (Operator != NULL)
         {
-
             for (; Operator != NULL;)
             {
                 arc = Operator->name;
@@ -149,7 +150,6 @@ int main()
                     delta += 1;
                     printf("+1\n");
                 }
-
                 Operator = Operator->next;
             }
         }
@@ -169,22 +169,38 @@ int main()
 
     printf("\n%d\n\n\n\n\n\n\nrunning\n", delta);
 
-    TabuSearch(H, delta, sol, Tabulist, Adjacent_Color_Table, size_node, size_edge);
+    tstart = clock();
 
+    TabuSearch(H, delta, sol, Tabulist, Adjacent_Color_Table, size_node, size_edge, log);
+
+    int soll = 1;
     for (i = 0; i < size_node; i++)
     {
         Operator = (H2 + i)->Edge;
         //printf("\n%d",size_node);
         for (; Operator != NULL;)
         {
-            printf("%d\n", ((sol[Operator->name] == sol[i]) ? 11111 : 0));
+            soll *= ((sol[Operator->name] == sol[i]) ? 0 : 1);
             //printf("Adjacent_Color_Table [%d][sol[%d]] = %d;\n", i, Operator->name,Adjacent_Color_Table [i][sol[Operator->name]]);
             Operator = Operator->next;
         }
     }
+    if (soll == 1)
+    {
+        printf("\nno conflict\n");
+        fprintf(log, "\nno conflict\n");
+    }
+    else
+    {
+        printf("\nconflict!!!1\n");
+        fprintf(log, "\nconflict!!!\n");
+    }
+    printf("\ntime = %f\nEnter to quit:", (double)tend - tstart / CLK_TCK);
+    fprintf(log, "\ntime = %f", (double)tend - tstart / CLK_TCK);
 
     fclose(graphdata);
     fclose(log);
+    getchar();
     return 0;
 }
 
@@ -262,7 +278,7 @@ void TabuSearch(
     int sol[],
     int Tabulist[][DESCOLOR],
     int Adjacent_Color_Table[][DESCOLOR],
-    int size_node, int size_edge)
+    int size_node, int size_edge, FILE *log)
 {
     int iter, u, vi, vj, delt, i;
     iter = 0;
@@ -276,9 +292,12 @@ void TabuSearch(
                  size_node);
         MakeMove(H, u, vi, vj, delt, sol, delta, min_f, iter, Tabulist, Adjacent_Color_Table);
     }
+    tend = clock();
     for (i = 0; i < size_node; i++)
     {
+
         printf("sol[%d] = %d\n", i, sol[i]);
+        fprintf(log, "sol[%d] = %d\n", i, sol[i]);
     }
 }
 
@@ -290,7 +309,9 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
     u = -1;
     int ut = -1;
     delt = maxdelt + 1;
-
+    srand(time(0));
+    int c = rand();
+    int samed = 1, samedt = 1;
     for (i = 0; i < size_node; i++)
     {
         if (Adjacent_Color_Table[i][sol[i]] > 0)
@@ -322,7 +343,6 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
                             vj = k;
                             prevdelt = delt;
                             //update the non-tabu best move;
-
                             //printf("update the non-tabu best move; %d\n",delt);
                         }
                     }
@@ -360,8 +380,10 @@ void MakeMove(HeadNodePtr H, int u, int vi, int vj, int delt, int sol[], int &de
     EdgeNodePtr Operator;
     sol[u] = vj;
     delta += delt;
+    printf("%d\n",delta);
     if (delta < min_f)
     {
+        //printf("%d\n",delta);
         min_f = delta;
     }
     //printf("delta + %d = %d\n", delt, delta);
