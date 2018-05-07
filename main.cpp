@@ -9,8 +9,8 @@
 #define ERROR 0
 #define OVERFLOW -2
 #define Maxiter 1000000
-#define DESCOLOR 49
-#define maxdelt 10000
+#define DESCOLOR 50
+#define maxdelt 1000000
 
 using namespace std;
 
@@ -32,6 +32,7 @@ typedef struct headNode
 //}HeadNode, *HeadNodePtr;
 
 clock_t tstart, tend;
+char debug;
 
 void insertEdge(HeadNodePtr H, int start, int target);
 void insertEdge2(HeadNodePtr H, int start, int target);
@@ -71,7 +72,7 @@ int main()
 
     //printf("File Directory:");
     //scanf("%s",path);
-    graphdata = fopen("K:\\Documents\\Coloring_Problem\\instances\\DSJC500.5.col", "r");
+    graphdata = fopen("K:\\Documents\\Coloring_Problem\\instances\\DSJC500.9.col", "r");
     log = fopen("log.txt", "w");
     color = DESCOLOR;
 
@@ -81,6 +82,8 @@ int main()
     fprintf(log, "color: %d\nMaxiter: %d\n", color, max);
     printf("opened file :\n%d nodes and %d edges.\nRandom seed: %u\n", path, size_node, size_edge, seed);
     printf("color: %d\nMaxiter: %d\n", color, max);
+    printf("DEBUG?(y):");
+    scanf("%c", &debug);
 
     //int sol[5] = {0, 0, 1, 2, 2};
     int sol[size_node];
@@ -150,6 +153,7 @@ int main()
                     delta += 1;
                     printf("+1\n");
                 }
+
                 Operator = Operator->next;
             }
         }
@@ -318,6 +322,7 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
         {
             for (k = 0; k < DESCOLOR; k++)
             {
+
                 if (k != sol[i])
                 {
                     delt = Adjacent_Color_Table[i][k] - Adjacent_Color_Table[i][sol[i]]; //calculate delt value of the move <i, sol[i], k>
@@ -332,6 +337,20 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
                             prevdeltt = delt;
                             //update the tabu best move;
                             //printf("update the tabu best move   %d\n",delt);
+                            samedt = 1;
+                        }
+                        if (delt == prevdeltt)
+                        {
+                            samedt++;
+                            if (rand() % samedt == 0)
+                            {
+                                ut = i;
+                                vit = sol[i];
+                                vjt = k;
+                                prevdeltt = delt;
+                                //update the tabu best move;
+                                //printf("update the tabu best move   %d\n",delt);
+                            }
                         }
                     }
                     else
@@ -344,6 +363,20 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
                             prevdelt = delt;
                             //update the non-tabu best move;
                             //printf("update the non-tabu best move; %d\n",delt);
+                            samed = 1;
+                        }
+                        if (delt == prevdeltt)
+                        {
+                            samed++;
+                            if (rand() % samed == 0)
+                            {
+                                u = i;
+                                vi = sol[i];
+                                vj = k;
+                                prevdelt = delt;
+                                //update the tabu best move;
+                                //printf("update the tabu best move   %d\n",delt);
+                            }
                         }
                     }
                 }
@@ -380,10 +413,10 @@ void MakeMove(HeadNodePtr H, int u, int vi, int vj, int delt, int sol[], int &de
     EdgeNodePtr Operator;
     sol[u] = vj;
     delta += delt;
-    printf("%d\n",delta);
+    if((debug == 'y')||(debug == 'Y') )printf("%d    \r", delta);
     if (delta < min_f)
     {
-        //printf("%d\n",delta);
+        if((debug == 'y')||(debug == 'Y') )printf("%d\n", delta);
         min_f = delta;
     }
     //printf("delta + %d = %d\n", delt, delta);

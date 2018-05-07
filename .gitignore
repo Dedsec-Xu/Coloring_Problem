@@ -1,5 +1,9 @@
 *.exe
 .vscode/settings.json
 bin/
-*.txt
+log.txt
 main.o
+*.layout
+*.cbp
+*.depend
+obj/
