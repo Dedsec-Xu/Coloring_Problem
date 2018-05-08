@@ -72,7 +72,7 @@ int main()
 
     //printf("File Directory:");
     //scanf("%s",path);
-    graphdata = fopen("K:\\Documents\\Coloring_Problem\\instances\\DSJC500.1.col", "r");
+    graphdata = fopen("E:\\Workspace\\SMARTLAB\\Coloring_Problem\\instances\\DSJC500.1.col", "r");
     log = fopen("log.txt", "w");
     color = DESCOLOR;
 
@@ -173,7 +173,7 @@ int main()
 
     printf("\n%d\n\n\n\n\n\n\nrunning\n", delta);
 
-    tstart = clock();
+
 
     TabuSearch(H, delta, sol, Tabulist, Adjacent_Color_Table, size_node, size_edge, log);
 
@@ -289,6 +289,7 @@ void TabuSearch(
     int iter, u, vi, vj, delt, i;
     iter = 0;
     int min_f = delta;
+    tstart = clock();
     for (; delta != 0; iter++)
     {
         FindMove(u, vi, vj, delt, delta, min_f, iter,
@@ -310,14 +311,13 @@ void TabuSearch(
 void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int iter, int Tabulist[][DESCOLOR], int Adjacent_Color_Table[][DESCOLOR], int sol[], int size_node)
 {
     int i, k, vit, vjt;
-    int prevdelt = maxdelt;
-    int prevdeltt = maxdelt;
+    int prevdelt = 100000;
+    int prevdeltt = 100000;
     u = -1;
     int ut = -1;
-    delt = maxdelt + 1;
-    srand(time(0));
     int c = rand();
-    int samed = 1, samedt = 1;
+    int samed = 0, samedt = 0;
+    int mark = 0;
     for (i = 0; i < size_node; i++)
     {
         if (Adjacent_Color_Table[i][sol[i]] > 0)
@@ -339,7 +339,7 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
                             prevdeltt = delt;
                             //update the tabu best move;
                             //printf("update the tabu best move   %d\n",delt);
-                            samedt = 1;
+                            samedt = 0;
                         }
                         if (delt == prevdeltt)
                         {
@@ -365,7 +365,8 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
                             prevdelt = delt;
                             //update the non-tabu best move;
                             //printf("update the non-tabu best move; %d\n",delt);
-                            samed = 1;
+                            samed = 0;
+                            mark = 1;
                         }
                         if (delt == prevdeltt)
                         {
@@ -385,7 +386,14 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
             }
         }
     }
-    if ((u == -1) && (ut == -1))
+    if (prevdeltt + delta < min_f)
+    {
+        u = ut;
+        vi = sol[u];
+        vj = vjt;
+        //printf("tabu");
+    }
+    else if (!mark)
     {
 
         u = rand() % size_node;
@@ -393,16 +401,7 @@ void FindMove(int &u, int &vi, int &vj, int &delt, int delta, int min_f, int ite
         vj = (sol[u] + rand() % (DESCOLOR - 1) + 1) % DESCOLOR;
         //printf("rand");
     }
-    else
-    {
-        if (prevdeltt + delta < min_f)
-        {
-            u = ut;
-            vi = sol[u];
-            vj = vjt;
-            //printf("tabu");
-        }
-    }
+
     //printf("%d %d %d\n", u, vi, vj);
     vi = sol[u];
     delt = Adjacent_Color_Table[u][vj] - Adjacent_Color_Table[u][vi];
@@ -415,10 +414,11 @@ void MakeMove(HeadNodePtr H, int u, int vi, int vj, int delt, int sol[], int &de
     EdgeNodePtr Operator;
     sol[u] = vj;
     delta += delt;
-    if((debug == 'y')||(debug == 'Y') )printf("%d    \r", delta);
+    //if((debug == 'y')||(debug == 'Y') )printf("%d    \r", delta);
     if (delta < min_f)
     {
-        if((debug == 'y')||(debug == 'Y') )printf("%d\n", delta);
+        if ((debug == 'y') || (debug == 'Y'))
+            printf("%d\n", delta);
         min_f = delta;
     }
     //printf("delta + %d = %d\n", delt, delta);
